@@ -84,7 +84,7 @@ def monte_carlo(runs=RUNS):
     simiulations = []
 
     for i in range(runs):
-        snp_return_percent = np.random.normal(loc=0.12, scale=0.2 , size=YEARS_REMAINING)
+        snp_return_percent = np.log(np.random.lognormal(mean=0.08, sigma=0.2 , size=YEARS_REMAINING))  # log normal distribution
         inflation = np.random.normal(loc=0.03, scale=0.035 , size=YEARS_REMAINING)
         drawdown = ANNUAL_DRAWDOWN * np.cumprod(1 + inflation)
         salary_growth = np.repeat(1 + SALARY_GROWTH_RATE, YEARS_REMAINING)
