@@ -28,7 +28,7 @@ SNP_DIV_YIELD = 0.014
 INTEREST_RATE = 0.03
 TAIL_RISK_COST = 3e4  # 30k AUD drawdown
 TAIL_RISK_PROBABILITY = 1/30  # 1 in every 30 year event
-RUNS = 1
+RUNS = 1000
 
 assert sum(PORTFOLIO_DISTRIBUTION.values()) == 1, logger.error("Porftolio distribution does not sum to 1")
 
