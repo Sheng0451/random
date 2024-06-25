@@ -13,6 +13,7 @@ stdout_handler.setFormatter(format)
 logger.addHandler(stdout_handler)
 
 # Fixed Variables
+IDEAL_NEST_EGG = 5e6
 YEARS_REMAINING = 110-25
 STARTING_EQUITY = 6e4
 STARTING_CASH = 6e4
@@ -28,7 +29,7 @@ SNP_DIV_YIELD = 0.014
 INTEREST_RATE = 0.03
 TAIL_RISK_COST = 3e4  # 30k AUD drawdown
 TAIL_RISK_PROBABILITY = 1/30  # 1 in every 30 year event
-RUNS = 1000
+RUNS = 10000
 
 assert sum(PORTFOLIO_DISTRIBUTION.values()) == 1, logger.error("Porftolio distribution does not sum to 1")
 
@@ -119,21 +120,51 @@ def sim_analysis(sims, column):
     return pd.DataFrame({i["simulation"]: i[column] for i in sims})
 
 
+def stats(sims, threshold, column):
+    check = [np.searchsorted(i[column], threshold) + 1 for i in sims]
+    check = [i for i in check if i < YEARS_REMAINING]
+    probability = len(check) / len(sims)
+    mean = np.mean(check)
+    std = np.std(check)
+    quantiles = np.quantile(check, [0,0.25,0.5,0.75,1])
+
+    return {
+        "probability": probability,
+        "mean": mean,
+        "std": std,
+        "min": quantiles[0],
+        "q25": quantiles[1],
+        "q50": quantiles[2],
+        "q75": quantiles[3],
+        "max": quantiles[4],
+    }
+
+
+# Percentage of sims have nest eggs exceeding a specific amount and at what year (of those, average, min, max, quartiles)
+# Percentage of sims have interest + dividend income greater than drawdown
+# Average nest egg amount per year
+# Max nest egg number at end
+# Min Nest egg number at end
+
 if __name__ == "__main__":
     monte_sims = monte_carlo()
 
-    metrics = ["nest_egg", "cash_position", "equity_position", "snp_return_percent", "inflation", "tail_risk"]
-    columns = 2
-    kicker = 1 if len(metrics) % columns > 0 else 0
-    fig, axs = plt.subplots(len(metrics)//columns + kicker, columns)
-    for i in range(len(metrics)):
-        df = sim_analysis(sims=monte_sims, column=metrics[i])
-        for c in df.columns:
-            axs[i//2, i%2].plot(df.index, df[c], linestyle='-')
-            axs[i//2, i%2].set_title(metrics[i])
-            axs[i//2, i%2].grid(True)
+    made_it_stats = stats(sims=monte_sims, threshold=IDEAL_NEST_EGG, column="nest_egg")
+    independent_stats = stats(sims=monte_sims, threshold=ANNUAL_DRAWDOWN, column="div_return")
+    print(made_it_stats)
+    print(independent_stats)
+    # metrics = ["nest_egg", "cash_position", "equity_position", "snp_return_percent", "inflation", "tail_risk"]
+    # columns = 2
+    # kicker = 1 if len(metrics) % columns > 0 else 0
+    # fig, axs = plt.subplots(len(metrics)//columns + kicker, columns)
+    # for i in range(len(metrics)):
+    #     df = sim_analysis(sims=monte_sims, column=metrics[i])
+    #     for c in df.columns:
+    #         axs[i//2, i%2].plot(df.index, df[c], linestyle='-')
+    #         axs[i//2, i%2].set_title(metrics[i])
+    #         axs[i//2, i%2].grid(True)
 
-    plt.show()
+    # plt.show()
 
 
 
