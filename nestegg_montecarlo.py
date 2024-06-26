@@ -140,19 +140,26 @@ def stats(sims, threshold, column):
     }
 
 
+def graph_threshold(sims, threshold, column):
+    check = [np.searchsorted(i[column], threshold) + 1 for i in sims]
+
+    plt.hist(x=check)
+    return plt.show()
+
 # Percentage of sims have nest eggs exceeding a specific amount and at what year (of those, average, min, max, quartiles)
 # Percentage of sims have interest + dividend income greater than drawdown
 # Average nest egg amount per year
 # Max nest egg number at end
 # Min Nest egg number at end
+# Graph the distribution of when i reach my nest egg.
 
 if __name__ == "__main__":
     monte_sims = monte_carlo()
-
-    made_it_stats = stats(sims=monte_sims, threshold=IDEAL_NEST_EGG, column="nest_egg")
-    independent_stats = stats(sims=monte_sims, threshold=ANNUAL_DRAWDOWN, column="div_return")
-    print(made_it_stats)
-    print(independent_stats)
+    graph_threshold(monte_sims, threshold=IDEAL_NEST_EGG, column="nest_egg")
+    # made_it_stats = stats(sims=monte_sims, threshold=IDEAL_NEST_EGG, column="nest_egg")
+    # independent_stats = stats(sims=monte_sims, threshold=ANNUAL_DRAWDOWN, column="div_return")
+    # print(made_it_stats)
+    # print(independent_stats)
     # metrics = ["nest_egg", "cash_position", "equity_position", "snp_return_percent", "inflation", "tail_risk"]
     # columns = 2
     # kicker = 1 if len(metrics) % columns > 0 else 0
